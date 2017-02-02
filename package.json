@@ -1,0 +1,26 @@
+{
+  "name": "bitkjs",
+  "version": "0.0.1",
+  "description": "Bioinformatics Toolkit in Javascript (Node.js)",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/daviortega/bitkJS.git"
+  },
+  "keywords": [
+    "bioinformatics"
+  ],
+  "author": "Davi Ortega",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/daviortega/bitkJS/issues"
+  },
+  "homepage": "https://github.com/daviortega/bitkJS#readme",
+  "dependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0"
+  }
+}
