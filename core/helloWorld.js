@@ -9,7 +9,7 @@ class HelloWord {
 	to(person) {
 		return this.heyThere + person
 	}
-	notTested() {
-		return false
+	tested() {
+		return true
 	}
 }
