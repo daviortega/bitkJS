@@ -4,7 +4,9 @@
   "description": "Bioinformatics Toolkit in Javascript (Node.js)",
   "main": "index.js",
   "scripts": {
-    "test": "test"
+    "test": "NODE_PATH=node_modules node_modules/.bin/mocha --reporter ${MOCHA_REPORTER-spec} '**/**/*.tests.js'",
+    "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
+    "eslint": "node_modules/.bin/eslint '**/**/*.js'"
   },
   "repository": {
     "type": "git",
@@ -14,6 +16,14 @@
     "bioinformatics"
   ],
   "author": "Davi Ortega",
+  "contributors": [
+    {
+      "name": "Davi Ortega"
+    }
+  ],
+  "pre-commit": [
+    "eslint"
+  ],
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/daviortega/bitkJS/issues"
@@ -21,6 +31,10 @@
   "homepage": "https://github.com/daviortega/bitkJS#readme",
   "dependencies": {
     "chai": "^3.5.0",
-    "mocha": "^3.2.0"
-  }
+    "eslint": "^3.14.1",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.2.0",
+    "mocha-lcov-reporter": "^1.2.0"
+  },
+  "private": true
 }
