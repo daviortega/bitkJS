@@ -12,13 +12,7 @@ describe('ReplaceFromKeys unit tests', function() {
 		let repFK = new ReplaceFromKeys(myKeys)
 		expect(repFK.keys).eql(myKeys)
 	})
-	it('attribute .data must be null before update', function() {
-		let myKeys = [
-			{b: 'd', a: '1'}
-		]
-		let repFK = new ReplaceFromKeys(myKeys)
-		expect(repFK.data).to.be.null
-	})
+	it('must complain for invalid keys')
 	it('must switch all elements', function() {
 		let myKeys = [
 			{b: 'd', a: '1'}
@@ -27,9 +21,9 @@ describe('ReplaceFromKeys unit tests', function() {
 			in: 'aadaaddaadddaaaa',
 			out: 'aa1aa11aa111aaaa'
 		}
-		let repFK = new ReplaceFromKeys(myKeys)
-		repFK.update(fixture.in)
-		expect(repFK.data).eql(fixture.out)
+		let repFK = new ReplaceFromKeys(myKeys),
+			result = repFK.update(fixture.in)
+		expect(result).eql(fixture.out)
 	})
 	it('must work with multiple items in key', function() {
 		let myKeys = [
@@ -40,9 +34,9 @@ describe('ReplaceFromKeys unit tests', function() {
 			in: 'aadaaddaadddaaaa',
 			out: '2212211221112222'
 		}
-		let repFK = new ReplaceFromKeys(myKeys)
-		repFK.update(fixture.in)
-		expect(repFK.data).eql(fixture.out)
+		let repFK = new ReplaceFromKeys(myKeys),
+			result = repFK.update(fixture.in)
+		expect(result).eql(fixture.out)
 	})
 	it('must work independently from other replacements', function() {
 		let myKeys = [
@@ -53,8 +47,9 @@ describe('ReplaceFromKeys unit tests', function() {
 			in: 'aadaaddaadddaaaa',
 			out: '22a22aa22aaa2222'
 		}
-		let repFK = new ReplaceFromKeys(myKeys)
-		repFK.update(fixture.in)
-		expect(repFK.data).eql(fixture.out)
+		let repFK = new ReplaceFromKeys(myKeys),
+			result = repFK.update(fixture.in)
+		expect(result).eql(fixture.out)
 	})
+	it('must complain if not a string is passed to be updated')
 })

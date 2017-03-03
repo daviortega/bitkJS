@@ -21,7 +21,7 @@ class ReplaceFromKeys {
 			})
 			self.data = newData
 		}
-		this.data = self.data
+		return self.data
 	}
 }
 
