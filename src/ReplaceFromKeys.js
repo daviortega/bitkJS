@@ -4,7 +4,6 @@ module.exports =
 class ReplaceFromKeys {
 	constructor(keys) {
 		this.keys = keys
-		this.data = null
 	}
 
 	update(thing) {
