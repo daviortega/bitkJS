@@ -23,12 +23,17 @@
   "pre-commit": [
     "eslint"
   ],
+  "bin": {
+    "longHeader": "./bin/replaceHeader.js"
+  },
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/daviortega/bitkJS/issues"
   },
   "homepage": "https://github.com/daviortega/bitkJS#readme",
-  "dependencies": {},
+  "dependencies": {
+    "argparse": "^1.0.9"
+  },
   "private": true,
   "devDependencies": {
     "chai": "^3.5.0",
