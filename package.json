@@ -24,7 +24,7 @@
     "eslint"
   ],
   "bin": {
-    "longHeader": "./bin/replaceHeader.js"
+    "bitkJS.longHeader": "./bin/replaceHeader.js"
   },
   "license": "ISC",
   "bugs": {
