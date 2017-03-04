@@ -31,11 +31,22 @@ parser.addArgument(
 		defaultValue: 'replacedHeader.txt'
 	}
 )
+parser.addArgument(
+	['-a', '--altKeys'],
+	{
+		help: 'name of the .json file with post-processing keys',
+		defaultValue: ''
+	}
+)
 
 let args = parser.parseArgs()
 
 let Transform = require('stream').Transform,
 	keys = require(path.resolve(args.keys))
+
+let altKeys = []
+if (args.altKeys !== '')
+	altKeys = require(path.resolve(args.altKeys)) // eslint-disable-line global-require
 
 let	readerStream = fs.createReadStream(path.resolve(args.input)),
 	writerStream = fs.createWriteStream(path.resolve(args.out)),
@@ -43,7 +54,7 @@ let	readerStream = fs.createReadStream(path.resolve(args.input)),
 	repFKs = new ReplaceFromKeys(keys)
 
 transform._transform = function(data, encoding, done) {
-	repFKs.update(data.toString())
+	repFKs.update(data.toString(), altKeys)
 	this.push(repFKs.data)
 }
 
