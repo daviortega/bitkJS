@@ -38,6 +38,23 @@ parser.addArgument(
 		defaultValue: ''
 	}
 )
+parser.addArgument(
+	['--extractTag'],
+	{
+		help: 'extract fields from tags in keys. pass the numbers of fields to keep. The detault delimiter is "|" but you can pass any other using --delim option.',
+		defaultValue: '',
+		type: Number,
+		nargs: '+'
+	}
+)
+parser.addArgument(
+	['--delim'],
+	{
+		help: 'Change the delimiter of fields in tag from the default "|"',
+		defaultValue: ''
+	}
+)
+
 
 let args = parser.parseArgs()
 
@@ -48,13 +65,22 @@ let altKeys = []
 if (args.altKeys !== '')
 	altKeys = require(path.resolve(args.altKeys)) // eslint-disable-line global-require
 
+let fieldsToKeep = [],
+	delim = '|'
+
+if (args.extractTag) {
+	fieldsToKeep = args.extractTag
+	if (args.delim)
+		delim = args.delim
+}
+
 let	readerStream = fs.createReadStream(path.resolve(args.input)),
 	writerStream = fs.createWriteStream(path.resolve(args.out)),
 	transform = new Transform(),
 	repFKs = new ReplaceFromKeys(keys)
 
 transform._transform = function(data, encoding, done) {
-	repFKs.update(data.toString(), altKeys)
+	repFKs.update(data.toString(), altKeys, fieldsToKeep, delim)
 	this.push(repFKs.data)
 }
 

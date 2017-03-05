@@ -24,8 +24,11 @@ class ReplaceFromKeys {
 	 * @returns string after the replacements
 	 */
 
-	update(thing = '', keyReplacements = []) {
+	update(thing = '', keyReplacements = [], fieldsToKeep = [], delim = '|') {
 		let self = this
+		if (fieldsToKeep.length !== 0)
+			self.keys = this._preProcessKeys(self.keys, fieldsToKeep, delim)
+
 		if (keyReplacements.length !== 0)
 			self.keys = this._replaceInKeys(self.keys, keyReplacements)
 
@@ -70,6 +73,19 @@ class ReplaceFromKeys {
 		return newKeys
 	}
 
+	_preProcessKeys(keys, fieldsToKeep, delim) {
+		let newKeys = []
+		keys.forEach(function(key) {
+			let newKey = {}
+			newKey.b = key.b
+			newKey.a = key.a
+				.split(delim)
+				.filter(function(expr, i) {
+					return fieldsToKeep.indexOf(i) !== -1
+				})
+				.join(delim)
+			newKeys.push(newKey)
+		})
+		return newKeys
+	}
 }
-
-
