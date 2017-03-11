@@ -25,7 +25,8 @@
     "eslint-pc"
   ],
   "bin": {
-    "bitkJS.longHeader": "./bin/replaceHeader.js"
+    "bitkJS.longHeader": "./bin/replaceHeader.js",
+    "bitkJS.phypro.rpsjson2csv": "./bin/phypro.rpsjson2csv.js"
   },
   "license": "ISC",
   "bugs": {
