@@ -25,14 +25,22 @@ class PhyproRPS2tbl {
 			result.rows.add(row)
 			data[pssm].hit.forEach((h) => {
 				if (h[1] < this.cutoff) {
-					let header = new BitkHeader(h[0])
-					tmpRes.push(
-						{
-							ro: row,
-							val: header.locus,
-							inf1: h[1]
-						}
-					)
+					let header = new BitkHeader(h[0]),
+						otherHit = tmpRes.findIndex((item) => {
+							return item.val === header.locus
+						})
+					if (otherHit === -1) {
+						tmpRes.push(
+							{
+								ro: row,
+								val: header.locus,
+								inf1: h[1]
+							}
+						)
+					}
+					else if (tmpRes[otherHit].inf1 > h[1]) {
+						tmpRes[otherHit].inf1 = h[1]
+					}
 				}
 			})
 			tmpRes.sort((a, b) => {
