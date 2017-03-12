@@ -6,7 +6,7 @@ let expect = require('chai').expect,
 
 let	cutoff = 0.001
 
-describe.only('PhyproRPS2tbl unit test', function() {
+describe('PhyproRPS2tbl unit test', function() {
 	it('let it parse', function() {
 		let myData = require('../sampleData/rps.mist22.508.myxo.json')
 		let expected =
