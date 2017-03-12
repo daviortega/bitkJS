@@ -6,7 +6,7 @@ let BitkHeader = require('./BitkHeader.js')
 
 module.exports =
 class PhyproRPS2tbl {
-	constructor(maxclustdist = 0, cutoff = defaultCutoff) {
+	constructor(cutoff = defaultCutoff, maxclustdist = 0) {
 		this.cutoff = cutoff
 		this.maxclustdist = maxclustdist
 	}
@@ -69,7 +69,8 @@ class PhyproRPS2tbl {
 		return tobegrouped
 	}
 	tocsv(data, sep = ',') {
-		let cols = Array.from(data.cols),
+		let decimalCases = 0,
+			cols = Array.from(data.cols),
 			result = sep + cols.join(sep) + '\n'
 
 		data.rows.forEach(function(row) {
@@ -78,7 +79,7 @@ class PhyproRPS2tbl {
 			})
 			result += row
 			thisRow.forEach((value) => {
-				result += ',' + value.val
+				result += ',' + value.val + ' (' + value.inf1.toExponential(decimalCases).toUpperCase() + ')'
 			})
 			result += '\n'
 		})

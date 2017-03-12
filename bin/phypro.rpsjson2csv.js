@@ -36,12 +36,11 @@ parser.addArgument(
 
 let args = parser.parseArgs(),
 	cutoff = args.cutoff,
-	outfile = args.out || args.input + 'parsed.txt',
-	maxclustDist = 5
+	outfile = args.out || args.input + 'parsed.txt'
 
 let data = require(path.resolve(args.input))
 
-let phyproRPS2tbl = new PhyproRPS2tbl(maxclustDist, cutoff),
+let phyproRPS2tbl = new PhyproRPS2tbl(cutoff),
 	parsed = phyproRPS2tbl.parse(data),
 	csv = phyproRPS2tbl.tocsv(parsed)
 

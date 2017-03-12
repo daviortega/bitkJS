@@ -116,7 +116,7 @@ describe('PhyproRPS2tbl unit test', function() {
 			]
 
 		let	maxclustDist = 5,
-			pRPS2tbl = new PhyproRPS2tbl(maxclustDist, cutoff),
+			pRPS2tbl = new PhyproRPS2tbl(cutoff, maxclustDist),
 			parsed = pRPS2tbl.parse(myData)
 		expect(parsed.vals).eql(expected)
 	})
@@ -153,8 +153,38 @@ describe('PhyproRPS2tbl unit test', function() {
 			{ro: 'COG0515', val: 'MXAN_7208', inf1: 7e-53, col: 'A27'}
 		]
 		let	maxclustDist = 5,
-			pRPS2tbl = new PhyproRPS2tbl(maxclustDist, cutoff),
+			pRPS2tbl = new PhyproRPS2tbl(cutoff, maxclustDist),
 			parsed = pRPS2tbl.parse(myData)
 		expect(parsed.vals).eql(expected)
+	})
+	it('make a nice csv with .tocsv()', function() {
+		let data = {
+			cols: [
+				'A0',
+				'A1',
+				'A2',
+				'A3',
+				'A4',
+				'A5'
+			],
+			rows: [
+				'COG1',
+				'COG2',
+				'COG3',
+				'COG4'
+			],
+			vals: [
+				{ro: 'COG1', val: 'locs_14', inf1: 6e-56, col: 'A0'},
+				{ro: 'COG1', val: 'locs_15', inf1: 8e-59, col: 'A1'},
+				{ro: 'COG2', val: 'locs_11', inf1: 6e-59, col: 'A2'},
+				{ro: 'COG3', val: 'locs_12', inf1: 2e-65, col: 'A3'},
+				{ro: 'COG3', val: 'locs_10', inf1: 7e-59, col: 'A4'},
+				{ro: 'COG4', val: 'locs_11', inf1: 6e-59, col: 'A5'}
+			]
+		}
+		let expected = ',A0,A1,A2,A3,A4,A5\nCOG1,locs_14 (6E-56),locs_15 (8E-59)\nCOG2,locs_11 (6E-59)\nCOG3,locs_12 (2E-65),locs_10 (7E-59)\nCOG4,locs_11 (6E-59)\n'
+		let	pRPS2tbl = new PhyproRPS2tbl(cutoff),
+			myCsv = pRPS2tbl.tocsv(data)
+		expect(myCsv).eql(expected)
 	})
 })
