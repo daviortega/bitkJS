@@ -17,7 +17,7 @@ class PhyproRPS2tbl {
 				cols: new Set(),
 				vals: []
 			},
-			pssmList = data.cog_list
+			pssmList = data.cdd_list
 
 		pssmList.forEach((pssm) => {
 			let row = data[pssm].cdd,
