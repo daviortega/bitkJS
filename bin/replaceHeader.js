@@ -41,7 +41,7 @@ parser.addArgument(
 parser.addArgument(
 	['--extractTag'],
 	{
-		help: 'extract fields from tags in keys. pass the numbers of fields to keep. The detault delimiter is "|" but you can pass any other using --delim option.',
+		help: 'extract fields from tags in keys. pass the numbers of fields to keep. The detault delimiter is "\|" but you can pass any other using --delim option.',
 		defaultValue: '',
 		type: Number,
 		nargs: '+'
@@ -50,7 +50,7 @@ parser.addArgument(
 parser.addArgument(
 	['--delim'],
 	{
-		help: 'Change the delimiter of fields in tag from the default "|"',
+		help: 'Change the delimiter of fields in tag from the default "\|"',
 		defaultValue: ''
 	}
 )
