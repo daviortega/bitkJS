@@ -12,22 +12,6 @@ module.exports =
 class ParseBlastResults extends Readable {
 	constructor(infile, keys = '') {
 		super({objectMode: true})
-		let keyStr = keys
-		if (keyStr === '')
-			keyStr = 'qseqid sseqid bitscore evalue qlen length qcovs slen'
-
-		let hdrs = this._parseKeyString(keyStr)
-
-		let options = {
-			hasHeader: false,
-			headers: hdrs,
-			separator: '\t'
-		}
-		this.parser = new Parser(options)
-
-		this.infile = infile
-		this.rowFlowing = false
-
 		this.log = bunyan.createLogger({
 			name: 'ParseBlastResults',
 			streams: [{
@@ -36,7 +20,23 @@ class ParseBlastResults extends Readable {
 				stream: prettyStdOut
 			}]
 		})
+		this.date = Date.now()
+		let keyStr = keys
+		if (keyStr === '')
+			keyStr = 'qseqid sseqid bitscore* evalue* qlen* length* qcovs* slen*'
+
+		this.hdrs = this._parseKeyString(keyStr)
+
+		let options = {
+			hasHeader: false,
+			headers: this.hdrs.headers,
+			separator: '\t'
+		}
 		this.log.info('Loading headers:' + options.headers.join(', '))
+		this.parser = new Parser(options)
+
+		this.infile = infile
+		this.rowFlowing = false
 	}
 
 	parse(infile) {
@@ -52,7 +52,13 @@ class ParseBlastResults extends Readable {
 					this.log.warn(err)
 				})
 				.on('row', (row) => {
+					this.hdrs.headers.forEach((hd, j) => {
+						if (this.hdrs.number[j])
+							row[hd] = Number(row[hd])
+					})
 					i++
+					row.id = i
+					row.stamp = this.date
 					this.log.info('Processing record number: %s => %s', i, row.qseqid)
 					this.push(row)
 				})
@@ -63,7 +69,18 @@ class ParseBlastResults extends Readable {
 	}
 
 	_parseKeyString(keyStr) {
-		let keys = keyStr.split(' ')
-		return keys
+		let keys = keyStr.split(' '),
+			isNumber = []
+		keys.forEach((key, i) => {
+			let match = key.match(/\*/)
+			if (match) {
+				isNumber.push(true)
+				keys[i] = key.replace('*', '')
+			}
+			else {
+				isNumber.push(false)
+			}
+		})
+		return {headers: keys, number: isNumber}
 	}
 }

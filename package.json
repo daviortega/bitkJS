@@ -39,6 +39,7 @@
     "argparse": "^1.0.9",
     "bunyan": "^1.8.8",
     "bunyan-prettystream": "^0.1.3",
+    "core-bio": "0.0.3",
     "csv-parse": "^1.2.0",
     "text2json": "^2.2.2"
   },

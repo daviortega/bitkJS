@@ -11,7 +11,7 @@ module.exports =
  *
  */
 class ReplaceFromKeys {
-	constructor(keys) {
+	constructor(keys = null) {
 		this.keys = keys
 	}
 
@@ -26,6 +26,7 @@ class ReplaceFromKeys {
 
 	update(thing = '', keyReplacements = [], fieldsToKeep = [], delim = '|') {
 		let self = this
+
 		if (fieldsToKeep.length !== 0)
 			self.keys = this._preProcessKeys(self.keys, fieldsToKeep, delim)
 

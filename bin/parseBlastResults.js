@@ -21,8 +21,8 @@ parser.addArgument(
 parser.addArgument(
 	['--keys'],
 	{
-		help: 'String of keys',
-		defaultValue: 'qseqid sseqid bitscore evalue qlen length qcovs slen'
+		help: 'String of keys. Mark with "*" if you want to make it an integer',
+		defaultValue: 'qseqid sseqid bitscore* evalue* qlen* length* qcovs* slen*'
 	}
 )
 parser.addArgument(
