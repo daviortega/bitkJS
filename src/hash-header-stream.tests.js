@@ -6,7 +6,7 @@ let expect = require('chai').expect,
 	fs = require('fs')
 
 
-let inputFasta = '../sampleData/bitk3.fa'
+let inputFasta = 'sampleData/bitk3.fa'
 
 let reader = fs.createReadStream(inputFasta),
 	parser = cbio.fastaStream(),
