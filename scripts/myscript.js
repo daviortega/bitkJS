@@ -5,7 +5,9 @@ const fs = require('fs'),
 	throught2 = require('through2'),
 	BitkHeader = require('../src/BitkHeader.js')
 
-let file = '../sampleData/chea.latest.s.class.new.bitk3.fa'
+
+let filein = process.argv[2],
+	fileout = process.argv[3]
 
 let orgs = {},
 	aa = {},
@@ -34,7 +36,9 @@ function seqStats(posistion, hash) {
 	})
 }
 
-fs.createReadStream(file)
+let writeOut = fs.createWriteStream(fileout)
+
+fs.createReadStream(filein)
 	.pipe(fasta())
 	.pipe(headerStats(orgs))
 	.pipe(seqStats(pos, aa))
@@ -42,6 +46,6 @@ fs.createReadStream(file)
 		console.log(JSON.stringify(orgs, null, '\t'))
 		console.log(JSON.stringify(aa))
 	})
-	.pipe(process.stdout)
+	.pipe(writeOut)
 
 

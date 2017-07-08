@@ -36,8 +36,6 @@ parser.addArgument(
 
 let args = parser.parseArgs()
 
-let Transform = require('stream').Transform
-
 let	readerStream = fs.createReadStream(path.resolve(args.input)),
 	writerStream = fs.createWriteStream(path.resolve(args.out)),
 	fastaReader = cbio.fastaStream(),
