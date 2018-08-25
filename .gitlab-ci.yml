@@ -8,11 +8,24 @@ stages:
   - build
   - test
 
-job 1:
+build:
   stage: build
   script: npm install
 
-job 2:
+test:
   stage: test
   script: npm test
-  coverage: npm run coverage
+  artifacts:
+    paths:
+      - coverage/
+
+pages:
+  stage: deploy
+  dependencies:
+    - rspec
+  script:
+    - mv coverage/ public/
+  artifacts:
+    paths:
+      - public
+    expire_in: 30 days

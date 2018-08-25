@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "description": "Bioinformatics Toolkit in Javascript (Node.js)",
   "scripts": {
-    "test": "NODE_PATH=node_modules node_modules/.bin/nyc node_modules/.bin/mocha $(find src -name '*tests.js')",
-    "coverage": "NODE_PATH=node_modules node_modules/.bin/nyc report --reporter=text-lcov | coveralls",
+    "test": "NODE_PATH=node_modules node_modules/.bin/nyc --reporter=html --reporter=text node_modules/.bin/mocha $(find src -name '*tests.js')",
+    "coverage": "NODE_PATH=node_modules node_modules/.bin/nyc --reporter=html ",
     "eslint": "node_modules/.bin/eslint src/*.js src/core/*js bin/*.js; exit 0",
     "eslint-pc": "node_modules/.bin/eslint src/*.js src/core/*js bin/*.js"
   },
@@ -59,7 +59,7 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "coveralls": "^2.11.15",
-    "eslint": "^3.14.1",
+    "eslint": "^3.19.0",
     "eslint-config-google": "^0.7.1",
     "eslint-config-standard": "^6.2.1",
     "eslint-plugin-promise": "^3.4.0",

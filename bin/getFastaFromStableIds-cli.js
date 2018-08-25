@@ -5,7 +5,8 @@ const path = require('path')
 const figlet = require('figlet')
 const chalk = require('chalk')
 
-const args = process.argv.slice(2).join(' ')
+const argPos = 2
+const args = process.argv.slice(argPos).join(' ')
 const script = path.resolve(__dirname, '../cli-scripts/getFasta.js')
 const path2bunyan = path.resolve(__dirname, '..', 'node_modules/.bin/bunyan')
 
