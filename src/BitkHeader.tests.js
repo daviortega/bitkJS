@@ -152,4 +152,21 @@ describe('BitkHeader unit test', function() {
 			})
 		})
 	})
+	describe('getLocus', function() {
+		it('should give the locus in version 3', function() {
+			const header = 'My_xan_508|MXAN_2680|YP_630897.1'
+			const bitkHeader = new BitkHeader(header)
+			const expectedLocus = 'MXAN_2680'
+			const locus = bitkHeader.getLocus()
+			expect(locus).eq(expectedLocus)
+		})
+		it('should give the locus in version 2', function() {
+			const header = 'My.xan.508-MXAN_2680-YP_630897.1'
+			const ver = 2
+			const bitkHeader = new BitkHeader(header, ver)
+			const expectedLocus = 'MXAN_2680'
+			const locus = bitkHeader.getLocus()
+			expect(locus).eq(expectedLocus)
+		})
+	})
 })

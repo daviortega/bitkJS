@@ -42,4 +42,8 @@ class BitkHeader {
 			extra = sep[ver].header + this.extra.join(sep[ver].header)
 		return orgID + sep[ver].header + this.locus + sep[ver].header + this.accession + extra
 	}
+
+	getLocus() {
+		return this.locus
+	}
 }
