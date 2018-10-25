@@ -32,7 +32,8 @@
     "bitkJS.parseBlastResults": "./bin/parseBlastResults.js",
     "bitkJS.bitk2Tobitk3": "./bin/bitk2Tobitk3.js",
     "bitkJS.SortByTag": "./bin/SortByTag.js",
-    "bitkJS.excludeFrom2ndFasta": "./bin/excludeFrom2ndFasta.js"
+    "bitkJS.excludeFrom2ndFasta": "./bin/excludeFrom2ndFasta.js",
+    "bitkJS.getFasta": "./bin/getFastaFromStableIds-cli.js"
   },
   "license": "ISC",
   "bugs": {
@@ -46,8 +47,11 @@
     "bluebird": "^3.5.0",
     "bunyan": "^1.8.8",
     "bunyan-prettystream": "^0.1.3",
+    "chalk": "^2.3.2",
     "core-bio": "0.0.7",
     "csv-parse": "^1.2.0",
+    "figlet": "^1.2.0",
+    "node-mist3": "^1.5.1",
     "pumpify": "^1.3.5",
     "sort-stream": "^1.0.1",
     "text2json": "^2.2.2"
