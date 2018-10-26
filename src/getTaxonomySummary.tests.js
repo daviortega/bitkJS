@@ -15,7 +15,7 @@ const headers = [
 	'Se.liq.7747-M495_06545-YP_008229264.1--36H'
 ]
 
-describe.only('getTaxonomySummary', function() {
+describe('getTaxonomySummary', function() {
 	it('should work', function() {
 		this.timeout(10000)
 		const ver = 2
