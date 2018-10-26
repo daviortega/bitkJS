@@ -4,7 +4,7 @@
 const path = require('path')
 const ArgumentParser = require('argparse').ArgumentParser
 const fastaUtils = require('../src/fasta-utils')
-const getTaxonomySummary = require('../src/getTaxonomySummary4fasta')
+const getTaxonomySummary = require('../src/getTaxonomySummary')
 const fs = require('fs')
 
 let parser = new ArgumentParser({
@@ -41,6 +41,11 @@ if (args.output === 'taxonomySummary.json')
 	args.output = args.input.replace(/\.([a-z]|[A-Z]){2,4}$/, '.taxonomySummary.json')
 
 console.log(args)
-fastaUtils(args.input).then(getTaxonomySummary).then((summary) => {
-    fs.writeFileSync(JSON.stringify(summary, null, ' '), args.output)
-})
+fastaUtils(args.input)
+    .then((sequences) => {
+        return sequences.map( seq => new BitkHeader(seq.header))
+    })
+    .then(getTaxonomySummary)
+    .then((summary) => {
+        fs.writeFileSync(JSON.stringify(summary, null, ' '), args.output)
+    })
