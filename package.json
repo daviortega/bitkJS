@@ -33,7 +33,8 @@
     "bitkJS.bitk2Tobitk3": "./bin/bitk2Tobitk3.js",
     "bitkJS.SortByTag": "./bin/SortByTag.js",
     "bitkJS.excludeFrom2ndFasta": "./bin/excludeFrom2ndFasta.js",
-    "bitkJS.getFasta": "./bin/getFastaFromStableIds-cli.js"
+    "bitkJS.getFasta": "./bin/getFastaFromStableIds-cli.js",
+    "bitkJS.getTaxSumm4fasta": "./bin/getTaxonomySummary4fasta-cli.js"
   },
   "license": "ISC",
   "bugs": {
@@ -61,6 +62,7 @@
   "private": true,
   "devDependencies": {
     "chai": "^3.5.0",
+    "chai-as-promised": "^7.1.1",
     "coveralls": "^2.11.15",
     "eslint": "^3.14.1",
     "eslint-config-google": "^0.7.1",

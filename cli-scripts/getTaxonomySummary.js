@@ -4,6 +4,7 @@
 const path = require('path')
 const ArgumentParser = require('argparse').ArgumentParser
 const fastaUtils = require('../src/fasta-utils')
+const BitkHeader = require('../src/BitkHeader')
 const getTaxonomySummary = require('../src/getTaxonomySummary')
 const fs = require('fs')
 
@@ -34,18 +35,16 @@ parser.addArgument(
 	}
 )
 
-
 let args = parser.parseArgs()
 
 if (args.output === 'taxonomySummary.json')
 	args.output = args.input.replace(/\.([a-z]|[A-Z]){2,4}$/, '.taxonomySummary.json')
 
-console.log(args)
-fastaUtils(args.input)
-    .then((sequences) => {
-        return sequences.map( seq => new BitkHeader(seq.header))
-    })
-    .then(getTaxonomySummary)
-    .then((summary) => {
-        fs.writeFileSync(JSON.stringify(summary, null, ' '), args.output)
-    })
+fastaUtils.loadFasta(args.input)
+    .then(
+		(sequences) => {
+			const headers = sequences.map((seq) => new BitkHeader(seq.header_, args.bitk_header_version))
+			return getTaxonomySummary(headers)
+		}
+	)
+    .then((summary) => fs.writeFileSync(args.output, JSON.stringify(summary, null, ' ')))
