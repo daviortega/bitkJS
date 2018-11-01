@@ -1,9 +1,15 @@
 'use strict'
 
-let expect = require('chai').expect,
-	BitkHeader = require('./BitkHeader.js')
+const fs = require('fs')
+const path = require('path')
 
-describe('BitkHeader unit test', function() {
+const expect = require('chai').expect
+const BitkHeader = require('./BitkHeader.js')
+
+const bitk2SampleFile = path.resolve(__dirname, '../sampleData/bitk2headerSamples.txt')
+const bitk2SampleData = fs.readFileSync(bitk2SampleFile).toString().split('\n')
+
+describe.only('BitkHeader unit test', function() {
 	describe('BITK3 type of tag format', function() {
 		let fixtures = [
 			{
@@ -106,6 +112,19 @@ describe('BitkHeader unit test', function() {
 				let bitkHeader = new BitkHeader(fixture.in, ver)
 				expect(bitkHeader.gid).equal(fixture.gid)
 			})
+		})
+	})
+	describe.only('should be able to handle non-bitk headers if asked', function() {
+		it('should work with several bitk header version 2', function() {
+			const expected = bitk2SampleData.length
+			let results = 0
+			bitk2SampleData.forEach((header) => {
+				const bitkHeader = new BitkHeader(header)
+				const isBitkHeader = bitkHeader.parse()
+				if (isBitkHeader)
+					results++
+			})
+			expect(results).eq(expected)
 		})
 	})
 	describe('utilities', function() {

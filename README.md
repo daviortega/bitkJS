@@ -3,3 +3,14 @@
 
 # bitkJS
 Bioinformatics Tool Kit in Javascript (Node.js)
+
+
+## How to install
+
+```
+npm install -g bitkJS
+```
+
+## Documentation
+
+Please read our work in progress [docs](./docs.md)

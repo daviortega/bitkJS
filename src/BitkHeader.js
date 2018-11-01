@@ -1,38 +1,104 @@
 'use strict'
 
+const bunyan = require('bunyan')
+
 let currVersion = 3
 
-let sep = {}
-
-sep[3] = {
-	header: '|',
-	genome: '_'
-}
-sep[2] = {
-	header: '-',
-	genome: '.'
-}
+let versionSpecs = [
+	{
+		version: 3,
+		sep: {
+			header: '|',
+			genome: '_'
+		}
+	},
+	{
+		version: 1,
+		sep: {
+			header: '-',
+			genome: '.',
+		},
+		regex: `[a-zA-Z][a-z]\.([a-z]{2}\.|[a-z]{3}|[A-Z][a-z]{2})\.[0-9]{1,6}-.*-([A-Z]{2}_[0-9]{5,10}\.[0-9]{1}|REF_.*:.*).*`
+	},
+	{
+		version: 2,
+		sep: {
+			header: '|',
+			genome: '-',
+		},
+		regex: `[a-zA-Z][a-z]_([a-z]{2}\.|[a-z]{3}|[A-Z][a-z]{2})_[0-9]{1,6}\|.*\|([A-Z]{2}_[0-9]{5,10}\.[0-9]{1}|REF_.*:.*).*`
+	}
+]
 
 module.exports =
 class BitkHeader {
-	constructor(header, ver = currVersion) {
-		this.version = ver
+	constructor(header) {
+		this.header = header
+		this.version = false
+		this.info = {
+			orgID: null,
+			ge: null,
+			sp: null,
+			locus: null,
+			accession: null,
+			genomeVersion: null,
+			extra: null,
+		}
+		this.log = bunyan.createLogger({
+			name: 'BitkHeader'
+		})
+	}
 
-		let fields = header.split(sep[ver].header),
-			extraPos = 3
+	parse(options = {skip: false}) {
+		this.version = this.sniffVersion_()
+		if (!this.version && !options.skip){
+			this.log.error(`Invalid header: ${this.header}`)
+			throw Error(`Invalid header: ${this.header}`)
+		}
+		else if (this.version === 2 || this.version) {
+			const versionSpec = versionSpecs.filter((v) => v.version === this.version)[0]
+			const fields = this.header.split(versionSpec.sep.header)
+			const extraPos = 3
 
-		let	genReg = new RegExp(/.{2}/),
-			speReg = new RegExp('\\' + sep[ver].genome + '.{3}'),
-			genIdReg = new RegExp(/[0-9]{1,4}/)
+			const genReg = new RegExp(/.{2}/)
+			const speReg = new RegExp('\\' + versionSpec.sep.genome + '.{3}')
+			const genIdReg = new RegExp(/[0-9]{1,4}/)
 
+			this.info.orgID = fields[0]
+			this.info.ge = this.info.orgID.match(genReg)[0]
+			this.info.sp = this.info.orgID.match(speReg)[0].slice(1)
+			this.info.gid = parseInt(this.info.orgID.match(genIdReg)[0])
+			this.info.locus = fields[1]
+			this.info.accession = fields[2]
+			this.info.extra = fields.slice(extraPos)
+			return true
+		}
+		else if (this.version === 3) {
+			const versionSpec = versionSpecs.filter((v) => v.version === this.version)[0]
+			const fields = this.header.split(versionSpec.sep.header)
+			const genReg = new RegExp(/.{2}/)
+			const speReg = new RegExp('\\' + versionSpec.sep.genome + '.{3}')
+			this.info.orgID = fields[0]
+			this.info.ge = this.info.orgID.match(genReg)[0]
+			this.info.sp = this.info.orgID.match(speReg)[0].slice(1)
+			const mist3Info = fields[1].split()
+			this.info.genomeVersion = mist3Info[0]
+			this.info.locus = mist3Info[1]
+			return true
+		}
+		return false
+	}
 
-		this.orgID = fields[0]
-		this.ge = this.orgID.match(genReg)[0]
-		this.sp = this.orgID.match(speReg)[0].slice(1)
-		this.gid = parseInt(this.orgID.match(genIdReg)[0])
-		this.locus = fields[1]
-		this.accession = fields[2]
-		this.extra = fields.slice(extraPos)
+	sniffVersion_() {
+		const matches = []
+		versionSpecs.forEach((versionSpec) => {
+			if (this.header.match(versionSpec.regex))
+				matches.push(versionSpec.version)
+		})
+		let version = false
+		if (matches.length >= 1)
+			version = matches[0]
+		return version
 	}
 
 	toVersion(ver) {
@@ -44,6 +110,10 @@ class BitkHeader {
 	}
 
 	getLocus() {
-		return this.locus
+		return this.info.locus
+	}
+
+	getGenomeVersion() {
+		return this.info.locus
 	}
 }
