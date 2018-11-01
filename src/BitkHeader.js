@@ -1,3 +1,5 @@
+
+/* eslint-disable no-magic-numbers */
 'use strict'
 
 const bunyan = require('bunyan')
@@ -10,23 +12,24 @@ let versionSpecs = [
 		sep: {
 			header: '|',
 			genome: '_'
-		}
+		},
+		regex: '[a-zA-Z][a-z]_([a-z]{3}.|[a-z]{2}|[A-Z][a-z]{2})[A-Z]{3}_[0-9]{9}.[0-9]-.*'
 	},
 	{
 		version: 1,
 		sep: {
 			header: '-',
-			genome: '.',
+			genome: '.'
 		},
-		regex: `[a-zA-Z][a-z]\.([a-z]{2}\.|[a-z]{3}|[A-Z][a-z]{2})\.[0-9]{1,6}-.*-([A-Z]{2}_[0-9]{5,10}\.[0-9]{1}|REF_.*:.*).*`
+		regex: '[a-zA-Z][a-z].([a-z]{2}.|[a-z]{3}|[A-Z][a-z]{2}).[0-9]{1,6}-.*-([A-Z]{2}_[0-9]{5,10}.[0-9]{1}|REF_.*:.*).*'
 	},
 	{
 		version: 2,
 		sep: {
 			header: '|',
-			genome: '-',
+			genome: '_'
 		},
-		regex: `[a-zA-Z][a-z]_([a-z]{2}\.|[a-z]{3}|[A-Z][a-z]{2})_[0-9]{1,6}\|.*\|([A-Z]{2}_[0-9]{5,10}\.[0-9]{1}|REF_.*:.*).*`
+		regex: '[a-zA-Z][a-z]_([a-z]{2}.|[a-z]{3}|[A-Z][a-z]{2})_[0-9]{1,6}|.*|([A-Z]{2}_[0-9]{5,10}.[0-9]{1}|REF_.*:.*).*'
 	}
 ]
 
@@ -36,57 +39,70 @@ class BitkHeader {
 		this.header = header
 		this.version = false
 		this.info = {
-			orgID: null,
 			ge: null,
 			sp: null,
+			gid: null,
 			locus: null,
 			accession: null,
 			genomeVersion: null,
-			extra: null,
+			extra: null
 		}
 		this.log = bunyan.createLogger({
 			name: 'BitkHeader'
 		})
+		this.isParsed = false
+	}
+
+	isParsed() {
+		if (this.isParsed)
+			return true
+		else
+			throw Error('Must parse header first with .parse()')
 	}
 
 	parse(options = {skip: false}) {
 		this.version = this.sniffVersion_()
-		if (!this.version && !options.skip){
+		this.log.info(`Header ${this.header} seems to be of version ${this.version}`)
+		if (!this.version && !options.skip) {
 			this.log.error(`Invalid header: ${this.header}`)
 			throw Error(`Invalid header: ${this.header}`)
 		}
-		else if (this.version === 2 || this.version) {
-			const versionSpec = versionSpecs.filter((v) => v.version === this.version)[0]
+		else if ([1, 2].indexOf(this.version) !== -1) {
+			const versionSpec = this.getVersionSpecs_(this.version)
 			const fields = this.header.split(versionSpec.sep.header)
+			this.log.debug(fields)
 			const extraPos = 3
 
 			const genReg = new RegExp(/.{2}/)
 			const speReg = new RegExp('\\' + versionSpec.sep.genome + '.{3}')
 			const genIdReg = new RegExp(/[0-9]{1,4}/)
 
-			this.info.orgID = fields[0]
-			this.info.ge = this.info.orgID.match(genReg)[0]
-			this.info.sp = this.info.orgID.match(speReg)[0].slice(1)
-			this.info.gid = parseInt(this.info.orgID.match(genIdReg)[0])
+			const orgID = fields[0]
+			this.log.debug(orgID)
+			this.log.debug(orgID.match(genReg))
+			this.info.ge = orgID.match(genReg)[0]
+			this.log.debug(orgID.match(speReg))
+			this.info.sp = orgID.match(speReg)[0].slice(1)
+			this.info.gid = parseInt(orgID.match(genIdReg)[0])
 			this.info.locus = fields[1]
 			this.info.accession = fields[2]
 			this.info.extra = fields.slice(extraPos)
-			return true
+			this.isParsed = true
 		}
 		else if (this.version === 3) {
-			const versionSpec = versionSpecs.filter((v) => v.version === this.version)[0]
+			const versionSpec = this.getVersionSpecs_(this.version)
 			const fields = this.header.split(versionSpec.sep.header)
 			const genReg = new RegExp(/.{2}/)
 			const speReg = new RegExp('\\' + versionSpec.sep.genome + '.{3}')
-			this.info.orgID = fields[0]
-			this.info.ge = this.info.orgID.match(genReg)[0]
-			this.info.sp = this.info.orgID.match(speReg)[0].slice(1)
+			const orgID = fields[0]
+			this.info.ge = orgID.match(genReg)[0]
+			this.info.sp = orgID.match(speReg)[0].slice(1)
 			const mist3Info = fields[1].split()
 			this.info.genomeVersion = mist3Info[0]
 			this.info.locus = mist3Info[1]
-			return true
+			this.isParsed = true
 		}
-		return false
+		return this.isParsed
 	}
 
 	sniffVersion_() {
@@ -95,18 +111,12 @@ class BitkHeader {
 			if (this.header.match(versionSpec.regex))
 				matches.push(versionSpec.version)
 		})
+		if (this.header === '')
+			return false
 		let version = false
 		if (matches.length >= 1)
 			version = matches[0]
 		return version
-	}
-
-	toVersion(ver) {
-		let orgID = this.ge + sep[ver].genome + this.sp + sep[ver].genome + this.gid,
-			extra = ''
-		if (this.extra.length !== 0)
-			extra = sep[ver].header + this.extra.join(sep[ver].header)
-		return orgID + sep[ver].header + this.locus + sep[ver].header + this.accession + extra
 	}
 
 	getLocus() {
@@ -116,4 +126,65 @@ class BitkHeader {
 	getGenomeVersion() {
 		return this.info.locus
 	}
+
+	getAccession() {
+		let accession = null
+		if (([1, 2].indexOf(this.version)) !== -1)
+			accession = this.info.accession
+		else
+			this.log.warn('This type of header does not have accessions')
+		return accession
+	}
+
+	getGId() {
+		let gid = null
+		if (([1, 2].indexOf(this.version)) !== -1)
+			gid = this.info.gid
+		else
+			this.log.warn('This type of header does not have MiST2 ids')
+		return gid
+	}
+
+	getOrgId(ver) {
+		let orgId = null
+		const versionSpec = this.getVersionSpecs_(ver)
+		const sep = versionSpec.sep
+		if (([1, 2].indexOf(this.version)) !== -1)
+			orgId = this.info.ge + sep.genome + this.info.sp + sep.genome + this.info.gid
+		else if (ver === 3)
+			orgId = this.info.ge + sep.genome + this.info.sp
+		else
+			this.log.warn('This type of header does not have MiST2 ids')
+		return orgId
+	}
+
+	toVersion(ver, options = {force: false}) {
+		let header = ''
+		switch (ver) {
+			case 1: {
+				const versionSpec = this.getVersionSpecs_(this.version)
+				const sep = versionSpec.sep
+				this.log.debug(this.info)
+				header = this.info.ge + sep.genome + this.info.sp + sep.genome + this.info.gid + sep.header + this.info.locus + sep.header + this.info.accession
+			}
+			case 2: {
+				const versionSpec = this.getVersionSpecs_(this.version)
+				const sep = versionSpec.sep
+				this.log.debug(this.info)
+				header = this.info.ge + sep.genome + this.info.sp + sep.genome + this.info.gid + sep.header + this.info.locus + sep.header + this.info.accession
+				this.log.debug(header)
+			}
+			case 3: {
+				const versionSpec = this.getVersionSpecs_(this.version)
+				const sep = versionSpec.sep
+				header = this.info.ge + sep.genome + this.info.sp + sep.genome + sep.header + this.info.genomeVersion + sep.header + this.info.locus
+			}
+		}
+		return header
+	}
+
+	getVersionSpecs_(ver) {
+		return versionSpecs.filter((v) => v.version === ver)[0]
+	}
+
 }

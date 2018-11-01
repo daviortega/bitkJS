@@ -7,10 +7,12 @@ const expect = require('chai').expect
 const BitkHeader = require('./BitkHeader.js')
 
 const bitk2SampleFile = path.resolve(__dirname, '../sampleData/bitk2headerSamples.txt')
-const bitk2SampleData = fs.readFileSync(bitk2SampleFile).toString().split('\n')
+const bitk2SampleData = fs.readFileSync(bitk2SampleFile)
+	.toString()
+	.split('\n')
 
 describe.only('BitkHeader unit test', function() {
-	describe('BITK3 type of tag format', function() {
+	describe('bitk header version 2 tag format', function() {
 		let fixtures = [
 			{
 				in: 'My_xan_508|MXAN_2680|YP_630897.1',
@@ -25,41 +27,33 @@ describe.only('BitkHeader unit test', function() {
 		it('Getting organism ID', () => {
 			fixtures.forEach(function(fixture) {
 				let bitkHeader = new BitkHeader(fixture.in)
-				expect(bitkHeader.orgID).equal(fixture.orgID)
+				bitkHeader.parse()
+				expect(bitkHeader.getOrgId()).equal(fixture.orgID)
 			})
 		})
 		it('Getting locus', () => {
 			fixtures.forEach(function(fixture) {
 				let bitkHeader = new BitkHeader(fixture.in)
-				expect(bitkHeader.locus).equal(fixture.lo)
+				bitkHeader.parse()
+				expect(bitkHeader.getLocus()).equal(fixture.lo)
 			})
 		})
 		it('Getting accession', () => {
 			fixtures.forEach(function(fixture) {
 				let bitkHeader = new BitkHeader(fixture.in)
-				expect(bitkHeader.accession).equal(fixture.ac)
-			})
-		})
-		it('Getting organism genus 2 characters marker', () => {
-			fixtures.forEach(function(fixture) {
-				let bitkHeader = new BitkHeader(fixture.in)
-				expect(bitkHeader.ge).equal(fixture.ge)
-			})
-		})
-		it('Getting organism species 3 characters marker', () => {
-			fixtures.forEach(function(fixture) {
-				let bitkHeader = new BitkHeader(fixture.in)
-				expect(bitkHeader.sp).equal(fixture.sp)
+				bitkHeader.parse()
+				expect(bitkHeader.getAccession()).equal(fixture.ac)
 			})
 		})
 		it('Getting organism MiST ID', () => {
 			fixtures.forEach(function(fixture) {
 				let bitkHeader = new BitkHeader(fixture.in)
-				expect(bitkHeader.gid).equal(fixture.gid)
+				bitkHeader.parse()
+				expect(bitkHeader.getGId()).equal(fixture.gid)
 			})
 		})
 	})
-	describe('BITK2 type of tag format', function() {
+	describe('bitk header version 1 tag format', function() {
 		let fixtures = [
 			{
 				in: 'My.xan.508-MXAN_2680-YP_630897.1',
@@ -73,48 +67,34 @@ describe.only('BitkHeader unit test', function() {
 		]
 		it('Getting organism ID', () => {
 			fixtures.forEach(function(fixture) {
-				let ver = 2
-				let bitkHeader = new BitkHeader(fixture.in, ver)
-				expect(bitkHeader.orgID).equal(fixture.orgID)
+				let bitkHeader = new BitkHeader(fixture.in)
+				bitkHeader.parse()
+				expect(bitkHeader.getOrgId()).equal(fixture.orgID)
 			})
 		})
 		it('Getting locus', () => {
 			fixtures.forEach(function(fixture) {
-				let ver = 2
-				let bitkHeader = new BitkHeader(fixture.in, ver)
-				expect(bitkHeader.locus).equal(fixture.lo)
+				let bitkHeader = new BitkHeader(fixture.in)
+				bitkHeader.parse()
+				expect(bitkHeader.getLocus()).equal(fixture.lo)
 			})
 		})
 		it('Getting accession', () => {
 			fixtures.forEach(function(fixture) {
-				let ver = 2
-				let bitkHeader = new BitkHeader(fixture.in, ver)
-				expect(bitkHeader.accession).equal(fixture.ac)
-			})
-		})
-		it('Getting organism genus 2 characters marker', () => {
-			fixtures.forEach(function(fixture) {
-				let ver = 2
-				let bitkHeader = new BitkHeader(fixture.in, ver)
-				expect(bitkHeader.ge).equal(fixture.ge)
-			})
-		})
-		it('Getting organism species 3 characters marker', () => {
-			fixtures.forEach(function(fixture) {
-				let ver = 2
-				let bitkHeader = new BitkHeader(fixture.in, ver)
-				expect(bitkHeader.sp).equal(fixture.sp)
+				const bitkHeader = new BitkHeader(fixture.in)
+				bitkHeader.parse()
+				expect(bitkHeader.getAccession()).equal(fixture.ac)
 			})
 		})
 		it('Getting organism MiST ID', () => {
 			fixtures.forEach(function(fixture) {
-				let ver = 2
-				let bitkHeader = new BitkHeader(fixture.in, ver)
-				expect(bitkHeader.gid).equal(fixture.gid)
+				const bitkHeader = new BitkHeader(fixture.in)
+				bitkHeader.parse()
+				expect(bitkHeader.getGId()).equal(fixture.gid)
 			})
 		})
 	})
-	describe.only('should be able to handle non-bitk headers if asked', function() {
+	describe.skip('should be able to handle non-bitk headers if asked', function() {
 		it('should work with several bitk header version 2', function() {
 			const expected = bitk2SampleData.length
 			let results = 0
@@ -127,25 +107,24 @@ describe.only('BitkHeader unit test', function() {
 			expect(results).eq(expected)
 		})
 	})
-	describe('utilities', function() {
-		it('Translate to versions 2 to 3', () => {
+	describe.only('utilities', function() {
+		it.only('Translate to versions 1 to 2', () => {
 			let fixtures = [
 				{
 					in: 'My.xan.508-MXAN_2680-YP_630897.1',
-					inVer: 2,
 					out: 'My_xan_508|MXAN_2680|YP_630897.1',
-					outVer: 3
+					outVer: 2
 				},
 				{
 					in: 'My.xan.508-MXAN_2680-YP_630897.1-F3-LJ',
-					inVer: 2,
 					out: 'My_xan_508|MXAN_2680|YP_630897.1|F3|LJ',
-					outVer: 3
+					outVer: 2
 				}
 			]
 			fixtures.forEach(function(fixture) {
-				let bitkHeader = new BitkHeader(fixture.in, fixture.inVer),
-					newHeader = bitkHeader.toVersion(fixture.outVer)
+				let bitkHeader = new BitkHeader(fixture.in)
+				bitkHeader.parse()
+				const newHeader = bitkHeader.toVersion(fixture.outVer)
 				expect(newHeader).equal(fixture.out)
 			})
 		})
@@ -175,14 +154,16 @@ describe.only('BitkHeader unit test', function() {
 		it('should give the locus in version 3', function() {
 			const header = 'My_xan_508|MXAN_2680|YP_630897.1'
 			const bitkHeader = new BitkHeader(header)
+			bitkHeader.parse()
 			const expectedLocus = 'MXAN_2680'
 			const locus = bitkHeader.getLocus()
 			expect(locus).eq(expectedLocus)
 		})
 		it('should give the locus in version 2', function() {
-			const header = 'My.xan.508-MXAN_2680-YP_630897.1'
-			const ver = 2
-			const bitkHeader = new BitkHeader(header, ver)
+			const header = 'My.const.508-MXAN_2680-YP_630897.1'
+
+			const bitkHeader = new BitkHeader(header)
+			bitkHeader.parse()
 			const expectedLocus = 'MXAN_2680'
 			const locus = bitkHeader.getLocus()
 			expect(locus).eq(expectedLocus)

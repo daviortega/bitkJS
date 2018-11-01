@@ -1,5 +1,5 @@
 {
     "mute": false,
-    "level": "warn",
+    "level": "debug",
     "reporter": "spec"
 }

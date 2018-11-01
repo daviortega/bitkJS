@@ -39,7 +39,7 @@ describe('getTaxonomySummary', function() {
 					genus: 'Gallionella',
 					species: 'Gallionella capsiferriformans',
 					strain: 'ES-2',
-					count: 2 
+					count: 2
 				},
 				{
 					version: 'GCF_000510325.1',
