@@ -1,6 +1,6 @@
 {
   "name": "bitkjs",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Bioinformatics Toolkit in Javascript (Node.js)",
   "scripts": {
     "test": "NODE_PATH=node_modules node_modules/.bin/nyc node_modules/.bin/mocha --reporter mocha-pretty-bunyan-nyan $(find src -name '*tests.js')",
