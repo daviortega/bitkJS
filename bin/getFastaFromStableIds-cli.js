@@ -6,15 +6,10 @@ const path = require('path')
 const figlet = require('figlet')
 const chalk = require('chalk')
 
-<<<<<<< HEAD
-const argPos = 2
-const args = process.argv.slice(argPos).join(' ')
-=======
 const pkjson = require('../package.json')
 
 const positionOfArg = 2
 const args = process.argv.slice(positionOfArg).join(' ')
->>>>>>> c-bitk-dataset
 const script = path.resolve(__dirname, '../cli-scripts/getFasta.js')
 const path2bunyan = path.resolve(__dirname, '..', 'node_modules/.bin/bunyan')
 
