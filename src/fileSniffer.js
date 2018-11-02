@@ -13,7 +13,7 @@ const isNewick = (data) => {
 
 const isList = (data) => {
 	const headers = data.split('\n').map((header) => new BitkHeader(header))
-	return 
+	return headers
 }
 
 module.exports = (filename) => {
@@ -22,5 +22,5 @@ module.exports = (filename) => {
 		return 'fasta'
 	if (isNewick(data))
 		return 'newick'
-
+	return isList(data)
 }

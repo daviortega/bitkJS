@@ -113,7 +113,6 @@ describe('getTaxonomySummary', function() {
 	})
 	it('should also work with bad locus', function() {
 		this.timeout(10000)
-		const ver = 2
 		const bitkHeaders = badHeaders.map((header) => {
 			const bitkHeader = new BitkHeader(header)
 			bitkHeader.parse()

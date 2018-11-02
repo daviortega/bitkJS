@@ -4,8 +4,6 @@
 
 const bunyan = require('bunyan')
 
-let currVersion = 3
-
 let versionSpecs = [
 	{
 		version: 3,

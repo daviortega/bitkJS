@@ -13,7 +13,6 @@ const bitk2SampleData = fs.readFileSync(bitk2SampleFile)
 
 describe('BitkHeader unit test', function() {
 	describe('bitk header version 2 tag format', function() {
-		const version = 2
 		let fixtures = [
 			{
 				in: 'My_xan_508|MXAN_2680|YP_630897.1',
