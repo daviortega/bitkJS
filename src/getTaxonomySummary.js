@@ -6,7 +6,7 @@ const mist3 = require('node-mist3')
 const genes = new mist3.Genes()
 const genomes = new mist3.Genomes()
 
-module.exports = (bitkHeaders) => {
+module.exports = (bitkHeadersList) => {
 	const taxonomyInfo = {
 		noData: [],
 		ambiguous: [],
@@ -70,5 +70,5 @@ module.exports = (bitkHeaders) => {
 		}
 		return taxonomyInfo
 	}
-	return getInfo(bitkHeaders)
+	return getInfo(bitkHeadersList)
 }

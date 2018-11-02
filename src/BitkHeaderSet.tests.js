@@ -1,8 +1,9 @@
+/* eslint-disable no-magic-numbers */
+/* eslint-disable no-invalid-this*/
 'use strict'
 
 const expect = require('chai').expect
 const BitkHeaderSet = require('./BitkHeaderSet')
-const BitkHeader = require('./BitkHeader')
 
 const headers = [
 	'Ga.cap.219-Galf_1012-YP_003846806.1--Uncat',
@@ -14,7 +15,7 @@ const headers = [
 	'Se.liq.7747-M495_06545-YP_008229264.1--36H'
 ]
 
-describe.only('BitkHeaderSet', function() {
+describe('BitkHeaderSet', function() {
 	describe('getBitkHeaders', function() {
 		it('should parse headers automatically', function() {
 			const bitkHeaderSet = new BitkHeaderSet(headers)
@@ -25,7 +26,7 @@ describe.only('BitkHeaderSet', function() {
 	})
 	describe('getTaxonomy', function() {
 		this.timeout(5000)
-		it('should parse headers automatically', function() {
+		it('should get Taxonomy (and also parse headers)', function() {
 			const bitkHeaderSet = new BitkHeaderSet(headers)
 			return bitkHeaderSet.getTaxonomy().then((taxonomy) => {
 				expect(taxonomy.data.length).eql(headers.length - 1)
