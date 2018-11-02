@@ -24,7 +24,11 @@ describe('getTaxonomySummary', function() {
 	it('should work', function() {
 		this.timeout(10000)
 		const ver = 2
-		const bitkHeaders = headers.map((header) => new BitkHeader(header, ver))
+		const bitkHeaders = headers.map((header) => {
+			const bitkHeader = new BitkHeader(header)
+			bitkHeader.parse()
+			return bitkHeader
+		})
 		const expected = {
 			noData: [],
 			ambiguous: [],
@@ -110,7 +114,11 @@ describe('getTaxonomySummary', function() {
 	it('should also work with bad locus', function() {
 		this.timeout(10000)
 		const ver = 2
-		const bitkHeaders = badHeaders.map((header) => new BitkHeader(header, ver))
+		const bitkHeaders = badHeaders.map((header) => {
+			const bitkHeader = new BitkHeader(header)
+			bitkHeader.parse()
+			return bitkHeader
+		})
 		const expected = {
 			noData: [
 				'Dd703_3560'

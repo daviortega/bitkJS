@@ -56,8 +56,7 @@ class BitkHeader {
 	isParsed() {
 		if (this.isParsed)
 			return true
-		else
-			throw Error('Must parse header first with .parse()')
+		throw Error('Must parse header first with .parse()')
 	}
 
 	parse(options = {skip: false}) {
@@ -78,11 +77,12 @@ class BitkHeader {
 			const genIdReg = new RegExp(/[0-9]{1,4}/)
 
 			const orgID = fields[0]
-			this.log.debug(orgID)
+			this.log.debug(`orgID parsed: ${orgID}`)
 			this.log.debug(orgID.match(genReg))
 			this.info.ge = orgID.match(genReg)[0]
 			this.log.debug(orgID.match(speReg))
 			this.info.sp = orgID.match(speReg)[0].slice(1)
+			this.log.debug(`The gid is here: ${orgID.match(genIdReg)}`)
 			this.info.gid = parseInt(orgID.match(genIdReg)[0])
 			this.info.locus = fields[1]
 			this.info.accession = fields[2]
@@ -146,12 +146,13 @@ class BitkHeader {
 	}
 
 	getOrgId(ver) {
+		const version = ver || this.version
 		let orgId = null
-		const versionSpec = this.getVersionSpecs_(ver)
+		const versionSpec = this.getVersionSpecs_(version)
 		const sep = versionSpec.sep
-		if (([1, 2].indexOf(this.version)) !== -1)
+		if (([1, 2].indexOf(version)) !== -1)
 			orgId = this.info.ge + sep.genome + this.info.sp + sep.genome + this.info.gid
-		else if (ver === 3)
+		else if (version === 3)
 			orgId = this.info.ge + sep.genome + this.info.sp
 		else
 			this.log.warn('This type of header does not have MiST2 ids')
@@ -160,31 +161,43 @@ class BitkHeader {
 
 	toVersion(ver, options = {force: false}) {
 		let header = ''
+		const versionSpec = this.getVersionSpecs_(ver)
+		this.log.debug(`version: ${ver}`)
 		switch (ver) {
 			case 1: {
-				const versionSpec = this.getVersionSpecs_(this.version)
 				const sep = versionSpec.sep
 				this.log.debug(this.info)
 				header = this.info.ge + sep.genome + this.info.sp + sep.genome + this.info.gid + sep.header + this.info.locus + sep.header + this.info.accession
+				if (this.info.extra.length !== 0)
+					header += sep.header + this.info.extra.join(sep.header)
+				this.log.debug(`Header version 1 was build as: ${header}`)
+				break
 			}
 			case 2: {
-				const versionSpec = this.getVersionSpecs_(this.version)
 				const sep = versionSpec.sep
 				this.log.debug(this.info)
 				header = this.info.ge + sep.genome + this.info.sp + sep.genome + this.info.gid + sep.header + this.info.locus + sep.header + this.info.accession
-				this.log.debug(header)
+				if (this.info.extra.length !== 0)
+					header += sep.header + this.info.extra.join(sep.header)
+				this.log.debug(`Header version 2 was build as: ${header}`)
+				break
 			}
 			case 3: {
-				const versionSpec = this.getVersionSpecs_(this.version)
 				const sep = versionSpec.sep
 				header = this.info.ge + sep.genome + this.info.sp + sep.genome + sep.header + this.info.genomeVersion + sep.header + this.info.locus
+				if (this.info.extra.length !== 0)
+					header += sep.header + this.info.extra.join(sep.header)
+				this.log.debug(`Header version 3 was build as: ${header}`)
+				break
 			}
 		}
 		return header
 	}
 
 	getVersionSpecs_(ver) {
-		return versionSpecs.filter((v) => v.version === ver)[0]
+		const versionSpec = versionSpecs.filter((v) => v.version === ver)[0]
+		this.log.debug(`Found version specs: ${JSON.stringify(versionSpec)}`)
+		return versionSpec
 	}
 
 }
