@@ -1,10 +1,11 @@
 {
   "name": "bitkjs",
-  "version": "0.0.1",
+  "version": "0.3.0",
   "description": "Bioinformatics Toolkit in Javascript (Node.js)",
   "scripts": {
-    "test": "NODE_PATH=node_modules node_modules/.bin/nyc --reporter=html --reporter=text node_modules/.bin/mocha $(find src -name '*tests.js')",
-    "coverage": "NODE_PATH=node_modules node_modules/.bin/nyc --reporter=html ",
+    "test": "NODE_PATH=node_modules node_modules/.bin/nyc node_modules/.bin/mocha --reporter mocha-pretty-bunyan-nyan $(find src -name '*tests.js')",
+    "mocha": "NODE_PATH=node_modules node_modules/.bin/mocha --reporter mocha-pretty-bunyan-nyan $(find src -name '*tests.js')",
+    "coverage": "NODE_PATH=node_modules node_modules/.bin/nyc report --reporter=text-lcov | coveralls",
     "eslint": "node_modules/.bin/eslint src/*.js src/core/*js bin/*.js; exit 0",
     "eslint-pc": "node_modules/.bin/eslint src/*.js src/core/*js bin/*.js"
   },
@@ -31,7 +32,8 @@
     "bitkJS.bitk2Tobitk3": "./bin/bitk2Tobitk3.js",
     "bitkJS.SortByTag": "./bin/SortByTag.js",
     "bitkJS.excludeFrom2ndFasta": "./bin/excludeFrom2ndFasta.js",
-    "bitkJS.getFasta": "./bin/getFastaFromStableIds-cli.js"
+    "bitkJS.getFasta": "./bin/getFastaFromStableIds-cli.js",
+    "bitkJS.getTaxSumm4fasta": "./bin/getTaxonomySummary4fasta-cli.js"
   },
   "license": "ISC",
   "bugs": {
@@ -49,8 +51,9 @@
     "core-bio": "0.0.7",
     "csv-parse": "^1.2.0",
     "figlet": "^1.2.0",
-    "node-mist3": "^1.5.1",
-    "nyc": "^12.0.2",
+    "mocha-pretty-bunyan-nyan": "^1.0.4",
+    "node-mist3": "^1.5.3",
+    "nyc": "^13.1.0",
     "pumpify": "^1.3.5",
     "sort-stream": "^1.0.1",
     "text2json": "^2.2.2"
@@ -58,6 +61,7 @@
   "private": true,
   "devDependencies": {
     "chai": "^3.5.0",
+    "chai-as-promised": "^7.1.1",
     "coveralls": "^2.11.15",
     "eslint": "^3.19.0",
     "eslint-config-google": "^0.7.1",

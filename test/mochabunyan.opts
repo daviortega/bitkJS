@@ -1,0 +1,5 @@
+{
+    "mute": false,
+    "level": "warn",
+    "reporter": "spec"
+}

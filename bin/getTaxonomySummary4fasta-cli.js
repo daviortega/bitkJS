@@ -6,21 +6,16 @@ const path = require('path')
 const figlet = require('figlet')
 const chalk = require('chalk')
 
-<<<<<<< HEAD
-const argPos = 2
-const args = process.argv.slice(argPos).join(' ')
-=======
 const pkjson = require('../package.json')
 
 const positionOfArg = 2
 const args = process.argv.slice(positionOfArg).join(' ')
->>>>>>> c-bitk-dataset
-const script = path.resolve(__dirname, '../cli-scripts/getFasta.js')
+const script = path.resolve(__dirname, '../cli-scripts/getTaxonomySummary.js')
 const path2bunyan = path.resolve(__dirname, '..', 'node_modules/.bin/bunyan')
 
-const splash = figlet.textSync('bitkJS-getFasta', {horizontalLayout: 'fitted'})
+const splash = figlet.textSync('bitkJS.getTaxSumm4fasta', {horizontalLayout: 'fitted'})
 console.log(chalk.cyan(splash))
 console.log(`\t\t\t\t\t\t\t            ${chalk.cyan('bitkJS-' + pkjson.version)}`)
-console.log(chalk.red('\t\t\t\t\t\t\t   by Davi Ortega'))
+console.log(chalk.red('\t\t\t\t\t\t\t\t\t   by Davi Ortega'))
 
 shell.exec('node ' + script + ' ' + args + ' | ' + path2bunyan + ' --color')
