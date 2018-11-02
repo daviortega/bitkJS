@@ -3,6 +3,19 @@
 'use strict'
 
 const bunyan = require('bunyan')
+const crypto = require('crypto')
+
+const log = bunyan.createLogger({
+	name: 'BitkHeader'
+})
+
+const kDefaults = {
+	crypto: {
+		hashAlgorithm: 'sha512',
+		hashEncoding: 'hex',
+		hashLength: 10
+	}
+}
 
 let versionSpecs = [
 	{
@@ -45,9 +58,6 @@ class BitkHeader {
 			genomeVersion: null,
 			extra: null
 		}
-		this.log = bunyan.createLogger({
-			name: 'BitkHeader'
-		})
 		this.isParsed = false
 	}
 
@@ -59,15 +69,15 @@ class BitkHeader {
 
 	parse(options = {skip: false}) {
 		this.version = this.sniffVersion_()
-		this.log.info(`Header ${this.header} seems to be of version ${this.version}`)
+		log.info(`Header ${this.header} seems to be of version ${this.version}`)
 		if (!this.version && !options.skip) {
-			this.log.error(`Invalid header: ${this.header}`)
+			log.error(`Invalid header: ${this.header}`)
 			throw Error(`Invalid header: ${this.header}`)
 		}
 		else if ([1, 2].indexOf(this.version) !== -1) {
 			const versionSpec = this.getVersionSpecs_(this.version)
 			const fields = this.header.split(versionSpec.sep.header)
-			this.log.debug(fields)
+			log.debug(fields)
 			const extraPos = 3
 
 			const genReg = new RegExp(/.{2}/)
@@ -75,12 +85,12 @@ class BitkHeader {
 			const genIdReg = new RegExp(/[0-9]{1,4}/)
 
 			const orgID = fields[0]
-			this.log.debug(`orgID parsed: ${orgID}`)
-			this.log.debug(orgID.match(genReg))
+			log.debug(`orgID parsed: ${orgID}`)
+			log.debug(orgID.match(genReg))
 			this.info.ge = orgID.match(genReg)[0]
-			this.log.debug(orgID.match(speReg))
+			log.debug(orgID.match(speReg))
 			this.info.sp = orgID.match(speReg)[0].slice(1)
-			this.log.debug(`The gid is here: ${orgID.match(genIdReg)}`)
+			log.debug(`The gid is here: ${orgID.match(genIdReg)}`)
 			this.info.gid = parseInt(orgID.match(genIdReg)[0])
 			this.info.locus = fields[1]
 			this.info.accession = fields[2]
@@ -117,12 +127,24 @@ class BitkHeader {
 		return version
 	}
 
+	getHash() {
+		const info = JSON.stringify(this.info)
+		const hash = crypto.createHash(kDefaults.crypto.hashAlgorithm)
+		hash.update(info)
+		return hash.digest(kDefaults.crypto.hashEncoding).substr(0, kDefaults.crypto.hashLength)
+	}
+
 	getLocus() {
 		return this.info.locus
 	}
 
 	getGenomeVersion() {
-		return this.info.locus
+		return this.info.genomeVersion
+	}
+
+	addGenomeVersion(genomeVersion) {
+		this.info.genomeVersion = genomeVersion
+		return
 	}
 
 	getAccession() {
@@ -130,7 +152,7 @@ class BitkHeader {
 		if (([1, 2].indexOf(this.version)) !== -1)
 			accession = this.info.accession
 		else
-			this.log.warn('This type of header does not have accessions')
+			log.warn('This type of header does not have accessions')
 		return accession
 	}
 
@@ -139,7 +161,7 @@ class BitkHeader {
 		if (([1, 2].indexOf(this.version)) !== -1)
 			gid = this.info.gid
 		else
-			this.log.warn('This type of header does not have MiST2 ids')
+			log.warn('This type of header does not have MiST2 ids')
 		return gid
 	}
 
@@ -153,31 +175,31 @@ class BitkHeader {
 		else if (version === 3)
 			orgId = this.info.ge + sep.genome + this.info.sp
 		else
-			this.log.warn('This type of header does not have MiST2 ids')
+			log.warn('This type of header does not have MiST2 ids')
 		return orgId
 	}
 
 	toVersion(ver, options = {force: false}) {
 		let header = ''
 		const versionSpec = this.getVersionSpecs_(ver)
-		this.log.debug(`version: ${ver}`)
+		log.debug(`version: ${ver}`)
 		switch (ver) {
 			case 1: {
 				const sep = versionSpec.sep
-				this.log.debug(this.info)
+				log.debug(this.info)
 				header = this.info.ge + sep.genome + this.info.sp + sep.genome + this.info.gid + sep.header + this.info.locus + sep.header + this.info.accession
 				if (this.info.extra.length !== 0)
 					header += sep.header + this.info.extra.join(sep.header)
-				this.log.debug(`Header version 1 was build as: ${header}`)
+				log.debug(`Header version 1 was build as: ${header}`)
 				break
 			}
 			case 2: {
 				const sep = versionSpec.sep
-				this.log.debug(this.info)
+				log.debug(this.info)
 				header = this.info.ge + sep.genome + this.info.sp + sep.genome + this.info.gid + sep.header + this.info.locus + sep.header + this.info.accession
 				if (this.info.extra.length !== 0)
 					header += sep.header + this.info.extra.join(sep.header)
-				this.log.debug(`Header version 2 was build as: ${header}`)
+				log.debug(`Header version 2 was build as: ${header}`)
 				break
 			}
 			case 3: {
@@ -185,7 +207,7 @@ class BitkHeader {
 				header = this.info.ge + sep.genome + this.info.sp + sep.genome + sep.header + this.info.genomeVersion + sep.header + this.info.locus
 				if (this.info.extra.length !== 0)
 					header += sep.header + this.info.extra.join(sep.header)
-				this.log.debug(`Header version 3 was build as: ${header}`)
+				log.debug(`Header version 3 was build as: ${header}`)
 				break
 			}
 		}
@@ -194,7 +216,7 @@ class BitkHeader {
 
 	getVersionSpecs_(ver) {
 		const versionSpec = versionSpecs.filter((v) => v.version === ver)[0]
-		this.log.debug(`Found version specs: ${JSON.stringify(versionSpec)}`)
+		log.debug(`Found version specs: ${JSON.stringify(versionSpec)}`)
 		return versionSpec
 	}
 

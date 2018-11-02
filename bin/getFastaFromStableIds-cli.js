@@ -6,7 +6,7 @@ const path = require('path')
 const figlet = require('figlet')
 const chalk = require('chalk')
 
-const pkjson = require('./package.json')
+const pkjson = require('../package.json')
 
 const positionOfArg = 2
 const args = process.argv.slice(positionOfArg).join(' ')
