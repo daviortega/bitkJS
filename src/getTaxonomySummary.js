@@ -48,22 +48,22 @@ module.exports = (bitkHeadersList) => {
 			if (bitkHeaders[i].getGenomeVersion() === null) {
 				log.warn(`Header ${bitkHeaders[i].getLocus()} does not have genome version.`)
 				await genes.search(bitkHeaders[i].getLocus())
-				.then((info) => {
-					let genomeVersion = null
-					if (info.length > 1) {
-						log.warn(`Ambiguous data recovered from ${bitkHeaders[i].getLocus()}`)
-						taxonomyInfo.ambiguous.push(bitkHeaders[i].getLocus())
-					}
-					else if (info.length === 0) {
-						log.warn(`No data recovered from ${bitkHeaders[i].getLocus()}`)
-						taxonomyInfo.noData.push(bitkHeaders[i].getLocus())
-					}
-					else {
-						log.debug(info)
-						genomeVersion = info[0].stable_id.split('-')[0]
-					}
-					bitkHeaders[i].addGenomeVersion(genomeVersion)
-				})
+					.then((info) => {
+						let genomeVersion = null
+						if (info.length > 1) {
+							log.warn(`Ambiguous data recovered from ${bitkHeaders[i].getLocus()}`)
+							taxonomyInfo.ambiguous.push(bitkHeaders[i].getLocus())
+						}
+						else if (info.length === 0) {
+							log.warn(`No data recovered from ${bitkHeaders[i].getLocus()}`)
+							taxonomyInfo.noData.push(bitkHeaders[i].getLocus())
+						}
+						else {
+							log.debug(info)
+							genomeVersion = info[0].stable_id.split('-')[0]
+						}
+						bitkHeaders[i].addGenomeVersion(genomeVersion)
+					})
 			}
 			log.info(`Getting taxonomy info for gene ${bitkHeaders[i].getHash()}`)
 			await getGenomeTaxomy(bitkHeaders[i])

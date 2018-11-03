@@ -4,6 +4,9 @@
 
 const bunyan = require('bunyan')
 const crypto = require('crypto')
+const mist3 = require('node-mist3')
+
+const genes = new mist3.Genes()
 
 const log = bunyan.createLogger({
 	name: 'BitkHeader'
@@ -22,7 +25,8 @@ let versionSpecs = [
 		version: 3,
 		sep: {
 			header: '|',
-			genome: '_'
+			genome: '_',
+			genomeVersion: '-'
 		},
 		regex: '[a-zA-Z][a-z]_([a-z]{3}.|[a-z]{2}|[A-Z][a-z]{2})[A-Z]{3}_[0-9]{9}.[0-9]-.*'
 	},
@@ -105,7 +109,7 @@ class BitkHeader {
 			const orgID = fields[0]
 			this.info.ge = orgID.match(genReg)[0]
 			this.info.sp = orgID.match(speReg)[0].slice(1)
-			const mist3Info = fields[1].split()
+			const mist3Info = fields[1].split(versionSpec.sep.genomeVersion)
 			this.info.genomeVersion = mist3Info[0]
 			this.info.locus = mist3Info[1]
 			this.isParsed = true
@@ -138,8 +142,37 @@ class BitkHeader {
 		return this.info.locus
 	}
 
-	getGenomeVersion() {
-		return this.info.genomeVersion
+	getGenomeVersion(fetch = false) {
+		return new Promise((resolve, reject) => {
+			if (this.info.genomeVersion !== null) {
+				resolve(this.info.genomeVersion)
+			}
+			else if (fetch) {
+				log.warn(`Header ${this.getLocus()} does not have genome version. Fetching...`)
+				genes.search(this.getLocus())
+					.then((info) => {
+						let genomeVersion = null
+						if (info.length > 1) {
+							log.warn(`Ambiguous data recovered from ${this.getLocus()}`)
+							reject(Error(`Genome version not found. Ambiguous data for locus ${this.getLocus()}`))
+						}
+						else if (info.length === 0) {
+							log.warn(`No data recovered from ${this.getLocus()}`)
+							reject(Error(`No data recovered from ${this.getLocus()}`))
+						}
+						else {
+							genomeVersion = info[0].stable_id.split('-')[0]
+							log.debug(`Found gene's genome version: ${genomeVersion}`)
+						}
+						this.addGenomeVersion(genomeVersion)
+						resolve(this.info.genomeVersion)
+						return
+					})
+			}
+			else {
+				reject(Error(`Genome version not found in header ${this.getLocus()}. No fetch allowed.`))
+			}
+		})
 	}
 
 	addGenomeVersion(genomeVersion) {

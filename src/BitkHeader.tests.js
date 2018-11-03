@@ -2,8 +2,14 @@
 
 const fs = require('fs')
 const path = require('path')
+const chai = require('chai')
+const chaiAsPromised = require('chai-as-promised')
 
-const expect = require('chai').expect
+chai.use(chaiAsPromised)
+
+const expect = chai.expect
+const should = chai.should()
+
 const BitkHeader = require('./BitkHeader.js')
 
 const bitk2SampleFile = path.resolve(__dirname, '../sampleData/bitk2headerSamples.txt')
@@ -166,6 +172,32 @@ describe('BitkHeader unit test', function() {
 			const expectedLocus = 'MXAN_2680'
 			const locus = bitkHeader.getLocus()
 			expect(locus).eq(expectedLocus)
+		})
+	})
+	describe('getGenomeVersion', function() {
+		it('should work with header with genome version', function() {
+			const header = 'Gr_hol|GCF_001558255.2-AL542_RS03615'
+			const bitkHeader = new BitkHeader(header)
+			bitkHeader.parse()
+			const expected = 'GCF_001558255.2'
+			return bitkHeader.getGenomeVersion().then((genomeVersion) => {
+				expect(genomeVersion).eql(expected)
+			})
+		})
+		it('should not work with valid header without genome version (bitk version 1)', function() {
+			const header = 'My.xan.508-MXAN_2680-YP_630897.1'
+			const bitkHeader = new BitkHeader(header)
+			bitkHeader.parse()
+			return bitkHeader.getGenomeVersion().should.be.rejectedWith('Genome version not found.')
+		})
+		it('should work with valid header without genome version (bitk version 1)', function() {
+			const header = 'My.xan.508-MXAN_2680-YP_630897.1'
+			const bitkHeader = new BitkHeader(header)
+			bitkHeader.parse()
+			const expected = 'GCF_000012685.1'
+			return bitkHeader.getGenomeVersion(true).then((genomeVersion) => {
+				expect(genomeVersion).eql(expected)
+			})
 		})
 	})
 })

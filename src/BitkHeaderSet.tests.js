@@ -15,6 +15,12 @@ const headers = [
 	'Se.liq.7747-M495_06545-YP_008229264.1--36H'
 ]
 
+const badHeaders = [
+	'Rh.pal.727-RPC_2742-YP_532609.1--38H',
+	'Di.dad.1167-Dd703_3560-YP_002989140.1--36H',
+	'Ga.cap.219-Galf_1013-YP_003846807.1--Uncat'
+]
+
 describe('BitkHeaderSet', function() {
 	describe('getBitkHeaders', function() {
 		it('should parse headers automatically', function() {
@@ -30,6 +36,44 @@ describe('BitkHeaderSet', function() {
 			const bitkHeaderSet = new BitkHeaderSet(headers)
 			return bitkHeaderSet.getTaxonomy().then((taxonomy) => {
 				expect(taxonomy.data.length).eql(headers.length - 1)
+			})
+		})
+	})
+	describe.only('fetchGenomeVersions', function() {
+		this.timeout(5000)
+		it('should fetch gene versions (and also parse headers)', function() {
+			const bitkHeaderSet = new BitkHeaderSet(headers)
+			const expected = [
+				'GCF_000145255.1',
+				'GCF_000145255.1',
+				'GCF_000510325.1',
+				'GCF_000013745.1',
+				'GCF_000294535.1',
+				'GCF_000018285.1',
+				'GCF_000422085.1'
+			]
+			return bitkHeaderSet.fetchGenomeVersions().then(() => {
+				const genomeVersionsPromises = bitkHeaderSet.getBitkHeaders().map((h) => h.getGenomeVersion())
+				return Promise.all(genomeVersionsPromises).then((genomeVersions) => {
+					expect(genomeVersions).eql(expected)
+				})
+			})
+		})
+		it.only('should pass with unavailable headers (and also parse headers)', function(done) {
+			const bitkHeaderSet = new BitkHeaderSet(badHeaders)
+			const expected = []
+			bitkHeaderSet.fetchGenomeVersions().then(() => {
+				const genomeVersionsPromises = bitkHeaderSet.getBitkHeaders().map((h) => h.getGenomeVersion())
+				Promise.all(genomeVersionsPromises).then((genomeVersions) => {
+					expect(genomeVersions).eql(expected)
+					done()
+				})
+			})
+		})
+		it('should throw with unavailable headers if keepGoing is false (and also parse headers)', function() {
+			const bitkHeaderSet = new BitkHeaderSet(badHeaders)
+			return bitkHeaderSet.fetchGenomeVersions({keepGoing: false}).catch((err) => {
+				expect(err).eql(new Error('Genome version not found.'))
 			})
 		})
 	})
