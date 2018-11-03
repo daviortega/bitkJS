@@ -11,16 +11,11 @@ const isNewick = (data) => {
 	return data[0] === '('
 }
 
-const isList = (data) => {
-	const headers = data.split('\n').map((header) => new BitkHeader(header))
-	return headers
-}
-
 module.exports = (filename) => {
 	const data = fs.readFileSync(filename)
 	if (isFasta(data))
 		return 'fasta'
 	if (isNewick(data))
 		return 'newick'
-	return isList(data)
+	return null
 }
