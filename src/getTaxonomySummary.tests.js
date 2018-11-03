@@ -23,7 +23,6 @@ const badHeaders = [
 describe('getTaxonomySummary', function() {
 	it('should work', function() {
 		this.timeout(10000)
-		const ver = 2
 		const bitkHeaders = headers.map((header) => {
 			const bitkHeader = new BitkHeader(header)
 			bitkHeader.parse()

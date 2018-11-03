@@ -1,10 +1,9 @@
 #!/usr/bin/env node
 'use strict'
 
-const path = require('path')
 const ArgumentParser = require('argparse').ArgumentParser
 const fastaUtils = require('../src/fasta-utils')
-const BitkHeader = require('../src/BitkHeader')
+const BitkHeaderSet = require('../src/BitkHeaderSet')
 const getTaxonomySummary = require('../src/getTaxonomySummary')
 const fs = require('fs')
 
@@ -43,8 +42,9 @@ if (args.output === 'taxonomySummary.json')
 fastaUtils.loadFasta(args.input)
     .then(
 		(sequences) => {
-			const headers = sequences.map((seq) => new BitkHeader(seq.header_, args.bitk_header_version))
-			return getTaxonomySummary(headers)
+			const headers = sequences.map((seq) => seq.header_)
+			const bitkHeaderSet = new BitkHeaderSet(headers)
+			return bitkHeaderSet.getTaxonomy()
 		}
 	)
     .then((summary) => fs.writeFileSync(args.output, JSON.stringify(summary, null, ' ')))
