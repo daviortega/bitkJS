@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 'use strict'
 
 const fs = require('fs')
@@ -100,6 +101,17 @@ describe('BitkHeader unit test', function() {
 			})
 		})
 	})
+	describe('Should not match other headers', function() {
+		const fixture = [
+			'XX108XX'
+		]
+		it('should throw error', function() {
+			fixture.forEach((header) => {
+				const bitkHeader = new BitkHeader(header)
+				expect(() => bitkHeader.parse()).to.throw()
+			})
+		})
+	})
 	describe('should be able to handle non-bitk headers if asked', function() {
 		it('should work with several bitk header version 2', function() {
 			const expected = bitk2SampleData.length
@@ -165,7 +177,7 @@ describe('BitkHeader unit test', function() {
 			expect(locus).eq(expectedLocus)
 		})
 		it('should give the locus in version 2', function() {
-			const header = 'My.const.508-MXAN_2680-YP_630897.1'
+			const header = 'My.xan.508-MXAN_2680-YP_630897.1'
 
 			const bitkHeader = new BitkHeader(header)
 			bitkHeader.parse()
@@ -174,28 +186,28 @@ describe('BitkHeader unit test', function() {
 			expect(locus).eq(expectedLocus)
 		})
 	})
-	describe('getGenomeVersion', function() {
+	describe('fetchGenomeVersion', function() {
 		it('should work with header with genome version', function() {
 			const header = 'Gr_hol|GCF_001558255.2-AL542_RS03615'
 			const bitkHeader = new BitkHeader(header)
 			bitkHeader.parse()
 			const expected = 'GCF_001558255.2'
-			return bitkHeader.getGenomeVersion().then((genomeVersion) => {
+			return bitkHeader.fetchGenomeVersion().then((genomeVersion) => {
 				expect(genomeVersion).eql(expected)
 			})
+		})
+		it('should also work with valid header without genome version (bitk version 1)', function() {
+			const header = 'My.xan.508-MXAN_2680-YP_630897.1'
+			const bitkHeader = new BitkHeader(header)
+			bitkHeader.parse()
+			return bitkHeader.fetchGenomeVersion({fetch: false}).should.be.rejectedWith('Genome version not found in header MXAN_2680. No fetch allowed.')
 		})
 		it('should not work with valid header without genome version (bitk version 1)', function() {
 			const header = 'My.xan.508-MXAN_2680-YP_630897.1'
 			const bitkHeader = new BitkHeader(header)
 			bitkHeader.parse()
-			return bitkHeader.getGenomeVersion().should.be.rejectedWith('Genome version not found.')
-		})
-		it('should work with valid header without genome version (bitk version 1)', function() {
-			const header = 'My.xan.508-MXAN_2680-YP_630897.1'
-			const bitkHeader = new BitkHeader(header)
-			bitkHeader.parse()
 			const expected = 'GCF_000012685.1'
-			return bitkHeader.getGenomeVersion(true).then((genomeVersion) => {
+			return bitkHeader.fetchGenomeVersion().then((genomeVersion) => {
 				expect(genomeVersion).eql(expected)
 			})
 		})

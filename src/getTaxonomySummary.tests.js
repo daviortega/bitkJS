@@ -4,7 +4,7 @@
 
 const expect = require('chai').expect
 const getTaxonomySummary = require('./getTaxonomySummary')
-const BitkHeader = require('./BitkHeader.js')
+const BitkHeaderSet = require('./BitkHeaderSet')
 
 const headers = [
 	'Ga.cap.219-Galf_1012-YP_003846806.1--Uncat',
@@ -23,11 +23,7 @@ const badHeaders = [
 describe('getTaxonomySummary', function() {
 	it('should work', function() {
 		this.timeout(10000)
-		const bitkHeaders = headers.map((header) => {
-			const bitkHeader = new BitkHeader(header)
-			bitkHeader.parse()
-			return bitkHeader
-		})
+		const bitkHeaders = new BitkHeaderSet(headers)
 		const expected = {
 			noData: [],
 			ambiguous: [],
@@ -106,24 +102,25 @@ describe('getTaxonomySummary', function() {
 				}
 			]
 		}
-		return getTaxonomySummary(bitkHeaders).then((info) => {
-			expect(info).eql(expected)
-		})
+		return bitkHeaders.fetchGenomeVersions()
+			.then(() => {
+				return getTaxonomySummary(bitkHeaders.getBitkHeaders()).then((info) => {
+					expect(info).eql(expected)
+				})
+			})
 	})
 	it('should also work with bad locus', function() {
 		this.timeout(10000)
-		const bitkHeaders = badHeaders.map((header) => {
-			const bitkHeader = new BitkHeader(header)
-			bitkHeader.parse()
-			return bitkHeader
-		})
-		const expected = {
-			noData: [
-				'Dd703_3560'
-			],
-			ambiguous: [],
-			data: []
-		}
-		return getTaxonomySummary(bitkHeaders).then((info) => expect(info).eql(expected))
+		const bitkHeaders = new BitkHeaderSet(badHeaders)
+		const expectedNoData = ['Dd703_3560']
+		return bitkHeaders.fetchGenomeVersions()
+			.then(() => {
+				return getTaxonomySummary(bitkHeaders.getBitkHeaders()).then((info) => {
+					expect(info.data).eql([])
+					expect(info.ambiguous).eql([])
+					const noData = info.noData.map((h) => h.getLocus())
+					expect(noData).eql(expectedNoData)
+				})
+			})
 	})
 })

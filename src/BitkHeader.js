@@ -36,7 +36,7 @@ let versionSpecs = [
 			header: '-',
 			genome: '.'
 		},
-		regex: '[a-zA-Z][a-z].([a-z]{2}.|[a-z]{3}|[A-Z][a-z]{2}).[0-9]{1,6}-.*-([A-Z]{2}_[0-9]{5,10}.[0-9]{1}|REF_.*:.*).*'
+		regex: /([a-zA-Z][a-z]|[A-Z][A-Z])\.([a-z]{2}\.|[a-z]{3}|[A-Z][a-z]{2}\.|\[[A-z][a-z]|'[A-Z][a-z]|[A-Z][a-z][a-z])\.[0-9]{1,6}-.*-([A-Z]{2,3}.[0-9]{5,10}.[0-9]{1}|REF_.*:.*).*/
 	},
 	{
 		version: 2,
@@ -44,15 +44,15 @@ let versionSpecs = [
 			header: '|',
 			genome: '_'
 		},
-		regex: '[a-zA-Z][a-z]_([a-z]{2}.|[a-z]{3}|[A-Z][a-z]{2})_[0-9]{1,6}|.*|([A-Z]{2}_[0-9]{5,10}.[0-9]{1}|REF_.*:.*).*'
+		regex: /([a-zA-Z][a-z]|[A-Z][A-Z])_([a-z]{2}\.|[a-z]{3}|[A-Z][a-z]{2}\.|\[[A-z][a-z]|'[A-Z][a-z]|[A-Z][a-z][a-z])_[0-9]{1,6}\|.*\|([A-Z]{2,3}.[0-9]{5,10}.[0-9]{1}|REF_.*:.*).*/
 	}
 ]
 
 module.exports =
 class BitkHeader {
 	constructor(header) {
-		this.header = header
-		this.version = false
+		this.originalHeader = header
+		this.originalVersion = false
 		this.info = {
 			ge: null,
 			sp: null,
@@ -72,15 +72,15 @@ class BitkHeader {
 	}
 
 	parse(options = {skip: false}) {
-		this.version = this.sniffVersion_()
-		log.info(`Header ${this.header} seems to be of version ${this.version}`)
-		if (!this.version && !options.skip) {
-			log.error(`Invalid header: ${this.header}`)
-			throw Error(`Invalid header: ${this.header}`)
+		this.originalVersion = this.sniffVersion_()
+		log.info(`Header ${this.originalHeader} seems to be of version ${this.originalVersion}`)
+		if (!this.originalVersion && !options.skip) {
+			log.error(`Invalid header: ${this.originalHeader}`)
+			throw Error(`Invalid header: ${this.originalHeader}`)
 		}
-		else if ([1, 2].indexOf(this.version) !== -1) {
-			const versionSpec = this.getVersionSpecs_(this.version)
-			const fields = this.header.split(versionSpec.sep.header)
+		else if ([1, 2].indexOf(this.originalVersion) !== -1) {
+			const versionSpec = this.getVersionSpecs_(this.originalVersion)
+			const fields = this.originalHeader.split(versionSpec.sep.header)
 			log.debug(fields)
 			const extraPos = 3
 
@@ -101,9 +101,9 @@ class BitkHeader {
 			this.info.extra = fields.slice(extraPos)
 			this.isParsed = true
 		}
-		else if (this.version === 3) {
-			const versionSpec = this.getVersionSpecs_(this.version)
-			const fields = this.header.split(versionSpec.sep.header)
+		else if (this.originalVersion === 3) {
+			const versionSpec = this.getVersionSpecs_(this.originalVersion)
+			const fields = this.originalHeader.split(versionSpec.sep.header)
 			const genReg = new RegExp(/.{2}/)
 			const speReg = new RegExp('\\' + versionSpec.sep.genome + '.{3}')
 			const orgID = fields[0]
@@ -120,10 +120,12 @@ class BitkHeader {
 	sniffVersion_() {
 		const matches = []
 		versionSpecs.forEach((versionSpec) => {
-			if (this.header.match(versionSpec.regex))
+			if (this.originalHeader.match(versionSpec.regex)) {
+				log.debug(this.originalHeader.match(versionSpec.regex))
 				matches.push(versionSpec.version)
+			}
 		})
-		if (this.header === '')
+		if (this.originalHeader === '')
 			return false
 		let version = false
 		if (matches.length >= 1)
@@ -142,23 +144,28 @@ class BitkHeader {
 		return this.info.locus
 	}
 
-	getGenomeVersion(fetch = false) {
+	getGenomeVersion() {
+		return this.info.genomeVersion
+	}
+
+	fetchGenomeVersion(options = {fetch: true, keepGoing: true}) {
 		return new Promise((resolve, reject) => {
 			if (this.info.genomeVersion !== null) {
 				resolve(this.info.genomeVersion)
 			}
-			else if (fetch) {
+			else if (options.fetch) {
 				log.warn(`Header ${this.getLocus()} does not have genome version. Fetching...`)
 				genes.search(this.getLocus())
 					.then((info) => {
+						log.debug(info)
 						let genomeVersion = null
 						if (info.length > 1) {
-							log.warn(`Ambiguous data recovered from ${this.getLocus()}`)
-							reject(Error(`Genome version not found. Ambiguous data for locus ${this.getLocus()}`))
+							log.error(`Ambiguous data recovered from ${this.getLocus()}`)
+							resolve(null)
 						}
 						else if (info.length === 0) {
-							log.warn(`No data recovered from ${this.getLocus()}`)
-							reject(Error(`No data recovered from ${this.getLocus()}`))
+							log.error(`No data recovered from ${this.getLocus()}`)
+							resolve(null)
 						}
 						else {
 							genomeVersion = info[0].stable_id.split('-')[0]
@@ -168,6 +175,10 @@ class BitkHeader {
 						resolve(this.info.genomeVersion)
 						return
 					})
+			}
+			else if (options.keepGoing) {
+				log.error(`Header ${this.getLocus()} does not have genome information on MiST3`)
+				resolve(null)
 			}
 			else {
 				reject(Error(`Genome version not found in header ${this.getLocus()}. No fetch allowed.`))
@@ -182,7 +193,7 @@ class BitkHeader {
 
 	getAccession() {
 		let accession = null
-		if (([1, 2].indexOf(this.version)) !== -1)
+		if (([1, 2].indexOf(this.originalVersion)) !== -1)
 			accession = this.info.accession
 		else
 			log.warn('This type of header does not have accessions')
@@ -191,7 +202,7 @@ class BitkHeader {
 
 	getGId() {
 		let gid = null
-		if (([1, 2].indexOf(this.version)) !== -1)
+		if (([1, 2].indexOf(this.originalVersion)) !== -1)
 			gid = this.info.gid
 		else
 			log.warn('This type of header does not have MiST2 ids')
@@ -199,7 +210,7 @@ class BitkHeader {
 	}
 
 	getOrgId(ver) {
-		const version = ver || this.version
+		const version = ver || this.originalVersion
 		let orgId = null
 		const versionSpec = this.getVersionSpecs_(version)
 		const sep = versionSpec.sep
@@ -212,10 +223,20 @@ class BitkHeader {
 		return orgId
 	}
 
-	toVersion(ver, options = {force: false}) {
+	getOriginalVersion() {
+		return this.orginalVersion
+	}
+
+	getOriginalHeader() {
+		return this.originalHeader
+	}
+
+	toVersion(version, options = {force: false}) {
+		const ver = version || this.originalVersion
 		let header = ''
 		const versionSpec = this.getVersionSpecs_(ver)
 		log.debug(`version: ${ver}`)
+		log.debug(this.info)
 		switch (ver) {
 			case 1: {
 				const sep = versionSpec.sep

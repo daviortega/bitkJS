@@ -31,7 +31,7 @@ describe('BitkHeaderSet', function() {
 		})
 	})
 	describe('getTaxonomy', function() {
-		this.timeout(5000)
+		this.timeout(10000)
 		it('should get Taxonomy (and also parse headers)', function() {
 			const bitkHeaderSet = new BitkHeaderSet(headers)
 			return bitkHeaderSet.getTaxonomy().then((taxonomy) => {
@@ -39,7 +39,7 @@ describe('BitkHeaderSet', function() {
 			})
 		})
 	})
-	describe.only('fetchGenomeVersions', function() {
+	describe('fetchGenomeVersions', function() {
 		this.timeout(5000)
 		it('should fetch gene versions (and also parse headers)', function() {
 			const bitkHeaderSet = new BitkHeaderSet(headers)
@@ -59,14 +59,17 @@ describe('BitkHeaderSet', function() {
 				})
 			})
 		})
-		it.only('should pass with unavailable headers (and also parse headers)', function(done) {
+		it('should pass with unavailable headers (and also parse headers)', function() {
 			const bitkHeaderSet = new BitkHeaderSet(badHeaders)
-			const expected = []
-			bitkHeaderSet.fetchGenomeVersions().then(() => {
+			const expected = [
+				'GCF_000013745.1',
+				null,
+				'GCF_000145255.1'
+			]
+			return bitkHeaderSet.fetchGenomeVersions().then(() => {
 				const genomeVersionsPromises = bitkHeaderSet.getBitkHeaders().map((h) => h.getGenomeVersion())
-				Promise.all(genomeVersionsPromises).then((genomeVersions) => {
+				return Promise.all(genomeVersionsPromises).then((genomeVersions) => {
 					expect(genomeVersions).eql(expected)
-					done()
 				})
 			})
 		})
@@ -74,6 +77,21 @@ describe('BitkHeaderSet', function() {
 			const bitkHeaderSet = new BitkHeaderSet(badHeaders)
 			return bitkHeaderSet.fetchGenomeVersions({keepGoing: false}).catch((err) => {
 				expect(err).eql(new Error('Genome version not found.'))
+			})
+		})
+	})
+	describe('addTax2Headers', function() {
+		it('should work', function() {
+			const bitkHeaderSet = new BitkHeaderSet(badHeaders)
+			const levels = ['phylum', 'class']
+			const expected = [
+				'Rh_pal_|GCF_000013745.1|RPC_2742||38H|Proteobacteria|Alphaproteobacteria',
+				'Di_dad_|null|Dd703_3560||36H|InfoNotFound|InfoNotFound',
+				'Ga_cap_|GCF_000145255.1|Galf_1013||Uncat|Proteobacteria|Betaproteobacteria'
+			]
+			return bitkHeaderSet.addTax2Headers(levels).then(() => {
+				const headersV3 = bitkHeaderSet.writeHeaders(3)
+				expect(headersV3).eql(expected)
 			})
 		})
 	})
